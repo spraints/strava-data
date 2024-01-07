@@ -5,13 +5,17 @@
 set -e
 set -o nounset
 
-echo '===> Install swagger'
-brew install swagger-codegen@2 maven
-export PATH="/opt/homebrew/opt/swagger-codegen@2/bin:${PATH}"
+IMAGE=openapitools/openapi-generator-cli:v7.2.0
 
 echo '===> Generate bindings'
 rm -rf strava-client || true
-swagger-codegen generate \
--i https://developers.strava.com/swagger/swagger.json \
--l rust \
--o strava-client
+docker run --rm \
+  -v "${PWD}:/local" \
+  ${IMAGE} \
+    generate \
+    -i https://raw.githubusercontent.com/openapitools/openapi-generator/master/modules/openapi-generator/src/test/resources/3_0/petstore.yaml \
+    -i https://developers.strava.com/swagger/swagger.json \
+    -g rust \
+    -o /local/strava-client \
+    --additional-properties=supportMultipleResponses=true,useSingleRequestParameter=true,packageName=strava_client \
+    --skip-validate-spec
