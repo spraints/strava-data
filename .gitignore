@@ -1,2 +1,4 @@
 /strava-client
 /target
+/.env
+/.DS_STORE
