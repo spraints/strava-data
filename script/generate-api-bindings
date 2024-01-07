@@ -1,0 +1,17 @@
+#!/bin/bash
+# Based on https://developers.strava.com/docs/#client-code
+# Generates a client in ./strava-client/.
+
+set -e
+set -o nounset
+
+echo '===> Install swagger'
+brew install swagger-codegen@2 maven
+export PATH="/opt/homebrew/opt/swagger-codegen@2/bin:${PATH}"
+
+echo '===> Generate bindings'
+rm -rf strava-client || true
+swagger-codegen generate \
+-i https://developers.strava.com/swagger/swagger.json \
+-l rust \
+-o strava-client
