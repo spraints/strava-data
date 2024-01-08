@@ -10,12 +10,12 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Command {
-    /// Login to strava.
-    Login,
-
-    /// Download
-    Download(DownloadArgs),
+    /// Verify that the archive can be parsed.
+    Verify(VerifyArgs),
 }
 
 #[derive(Args)]
-pub struct DownloadArgs {}
+pub struct VerifyArgs {
+    /// The directory that was downloaded.
+    pub dir: String,
+}
