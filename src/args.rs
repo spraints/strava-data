@@ -16,6 +16,7 @@ pub enum Command {
 
 #[derive(Args)]
 pub struct VerifyArgs {
-    /// The directory that was downloaded.
+    /// The directory that was extracted from the archive downloaded from
+    /// https://www.strava.com/athlete/delete_your_account.
     pub dir: String,
 }

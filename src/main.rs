@@ -1,10 +1,10 @@
 mod args;
 
 use args::{Cli, Command};
+use chrono::{NaiveDateTime, Utc};
 use clap::Parser;
-use serde::de::DeserializeOwned;
-use serde::Deserialize;
-use std::fs::{DirEntry, File};
+use csv::StringRecord;
+use std::fs::DirEntry;
 use std::path::Path;
 
 fn main() {
@@ -26,48 +26,43 @@ fn parse<P: AsRef<Path>>(dir: P) -> anyhow::Result<Archive> {
 
 fn parse_dir_entry(archive: &mut Archive, e: DirEntry) -> anyhow::Result<()> {
     match e.file_name().to_str() {
-        Some("flags.csv") => archive.flags = parse_file(e.path())?,
-        Some("media.csv") => archive.media = parse_file(e.path())?,
-        _ => anyhow::bail!("{}: unrecognized file name", e.path().to_string_lossy()),
+        Some("activities.csv") => archive.activities = parse_activities_csv(e.path())?,
+        _ => (),
     };
     Ok(())
 }
 
-fn parse_file<P: AsRef<Path>, T: DeserializeOwned>(filename: P) -> anyhow::Result<Vec<T>> {
-    let r = File::open(filename)?;
-    let mut rdr = csv::Reader::from_reader(r);
+fn parse_activities_csv<P: AsRef<Path>>(path: P) -> anyhow::Result<Vec<ActivitySummary>> {
+    let mut rdr = csv::Reader::from_path(path)?;
     let mut res = Vec::new();
-    for x in rdr.deserialize() {
-        let record: T = x?;
-        res.push(record);
+    for record in rdr.records().skip(1) {
+        res.push(record?.try_into()?);
     }
     Ok(res)
 }
 
 #[derive(Default)]
 struct Archive {
-    flags: Vec<Flag>,
-    media: Vec<Media>,
+    activities: Vec<ActivitySummary>,
 }
 
-#[derive(Deserialize)]
-struct Flag {
-    #[serde(rename = "Category")]
-    category: String,
-    #[serde(rename = "Flagged Type")]
-    flagged_type: String,
-    #[serde(rename = "Flagged ID")]
-    flagged_id: String,
-    #[serde(rename = "Comments")]
-    comments: String,
-    #[serde(rename = "Created At")]
-    created_at: String,
+struct ActivitySummary {
+    id: u128,
+    date: chrono::DateTime<Utc>,
 }
 
-#[derive(Deserialize)]
-struct Media {
-    #[serde(rename = "Media Filename")]
-    filename: String,
-    #[serde(rename = "Media Caption")]
-    caption: String,
+impl TryFrom<StringRecord> for ActivitySummary {
+    type Error = anyhow::Error;
+
+    fn try_from(value: StringRecord) -> Result<Self, Self::Error> {
+        fn f(v: &StringRecord, i: usize) -> anyhow::Result<&str> {
+            v.get(i).ok_or_else(|| {
+                anyhow::anyhow!("tried to get field {i} from row with {} fields", v.len())
+            })
+        }
+        Ok(Self {
+            id: f(&value, 0)?.parse()?,
+            date: NaiveDateTime::parse_from_str(f(&value, 1)?, "%b %d, %Y, %H:%M:%S %p")?.and_utc(),
+        })
+    }
 }
