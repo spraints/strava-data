@@ -11,14 +11,11 @@ pub struct Cli {
 #[derive(Subcommand)]
 pub enum Command {
     /// Login to strava.
-    Login(LoginArgs),
+    Login,
 
     /// Download
     Download(DownloadArgs),
 }
-
-#[derive(Args)]
-pub struct LoginArgs {}
 
 #[derive(Args)]
 pub struct DownloadArgs {}
