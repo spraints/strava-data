@@ -7,9 +7,7 @@ use chrono::{DateTime, Local};
 use clap::Parser;
 use serde::de::DeserializeOwned;
 use std::borrow::Cow;
-use std::fmt::Display;
 use std::fs::DirEntry;
-use std::ops::Div;
 use std::path::Path;
 
 fn main() {
@@ -109,7 +107,7 @@ fn mmss(sec: u32) -> String {
 fn distance_trend_row(act: &ActivitySummary) -> Row {
     Some(vec![
         format!("{:0.02} km", act.distance).into(),
-        format!("{}", mmss(act.moving_seconds as u32)).into(),
+        mmss(act.moving_seconds as u32).into(),
         act.avg_speed
             .map(km_pace)
             .map(Into::into)
@@ -157,10 +155,9 @@ fn parse<P: AsRef<Path>>(dir: P) -> anyhow::Result<Archive> {
 }
 
 fn parse_dir_entry(archive: &mut Archive, e: DirEntry) -> anyhow::Result<()> {
-    match e.file_name().to_str() {
-        Some("activities.csv") => archive.activities = parse_activities_csv(e.path())?,
-        _ => (),
-    };
+    if let Some("activities.csv") = e.file_name().to_str() {
+        archive.activities = parse_activities_csv(e.path())?;
+    }
     Ok(())
 }
 
