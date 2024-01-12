@@ -11,7 +11,13 @@ use std::path::Path;
 fn main() {
     match Cli::parse().command {
         Command::Verify(args) => match parse(&args.dir) {
-            Ok(_) => println!("{}: OK!", args.dir),
+            Ok(archive) => {
+                println!("{}: OK!", args.dir);
+                println!("activities:");
+                println!("  {:?}", archive.activities[0]);
+                println!("  ...");
+                println!("  {:?}", archive.activities[archive.activities.len() - 1]);
+            }
             Err(e) => println!("{}: error: {}", args.dir, e),
         },
     };
@@ -67,7 +73,7 @@ struct Archive {
     activities: Vec<ActivitySummary>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 struct ActivitySummary {
     #[serde(rename = "Activity ID")]
     id: u128,
@@ -88,24 +94,24 @@ struct ActivitySummary {
     #[serde(rename = "Elapsed Time (2)")]
     elapsed_seconds2: Option<f32>,
     #[serde(rename = "Moving Time")]
-    moving_seconds: Option<f32>,
+    moving_seconds: f32,
     #[serde(rename = "Distance (2)")]
     distance2: f32,
     #[serde(rename = "Max Speed")]
-    max_speed: Option<f32>,
+    max_speed: f32,
     #[serde(rename = "Average Speed")]
     avg_speed: Option<f32>,
     #[serde(rename = "Elevation Low")]
-    elevation_low: Option<f32>,
+    elevation_low: f32,
     #[serde(rename = "Elevation High")]
-    elevation_high: Option<f32>,
+    elevation_high: f32,
     // - My initial point of curiosity was date,activity_type,max_heart_rate so that I could see how
     //   heart rate varied per activity. If avg heart rate is available, that would be nice to see,
     //   too.
     // - I think I'd also be interested in plotting distance and time for run and/or bike.
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 enum ActivityType {
     #[serde(rename = "Alpine Ski")]
     AlpineSki,
