@@ -22,14 +22,12 @@ pub struct ActivitySummary {
     pub distance: f32,
     #[serde(rename = "Max Heart Rate")]
     pub max_heart_rate: Option<f32>,
+    #[serde(rename = "Average Heart Rate")]
+    pub avg_heart_rate: Option<f32>,
     #[serde(rename = "Filename")]
     pub filename: String,
-    #[serde(rename = "Elapsed Time (2)")]
-    pub elapsed_seconds2: Option<f32>,
     #[serde(rename = "Moving Time")]
     pub moving_seconds: f32,
-    #[serde(rename = "Distance (2)")]
-    pub distance2: f32,
     #[serde(rename = "Max Speed")]
     pub max_speed: f32,
     #[serde(rename = "Average Speed")]
@@ -44,7 +42,7 @@ pub struct ActivitySummary {
     // - I think I'd also be interested in plotting distance and time for run and/or bike.
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone, clap::ValueEnum, PartialEq)]
 pub enum ActivityType {
     #[serde(rename = "Alpine Ski")]
     AlpineSki,
