@@ -69,7 +69,7 @@ where
 }
 
 fn parse_date(s: &str) -> Result<DateTime<Utc>, chrono::ParseError> {
-    NaiveDateTime::parse_from_str(&s, "%b %-d, %Y, %-I:%M:%S %p").map(|dt| dt.and_utc())
+    NaiveDateTime::parse_from_str(s, "%b %-d, %Y, %-I:%M:%S %p").map(|dt| dt.and_utc())
 }
 
 #[cfg(test)]
